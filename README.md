@@ -63,6 +63,26 @@ This test suite verifies:
 - Relayer Recovery (Restarting relayer while events occur)
 - Cross-Chain Governance (Pausing the bridge)
 
+## How to Evaluate
+
+To verify the submission against the core requirements:
+
+1. **Unit Tests**: Run tests for individual contract logic:
+   ```bash
+   npx hardhat test tests/ChainA.test.js
+   npx hardhat test tests/ChainB.test.js
+   ```
+
+2. **End-to-End Integration**: Run the full bridge flow:
+   ```bash
+   npx hardhat test tests/integration_test.js
+   ```
+
+3. **Container Verification**:
+   - Run `docker ps` to ensure `chain-a`, `chain-b`, and `relayer` are running.
+   - Run `docker logs localomnichainassetbridgeb-relayer-1` to see real-time event processing.
+
+
 ## Project Structure
 - `contracts/`: Solidity smart contracts for both chains.
 - `scripts/`: Deployment scripts.
