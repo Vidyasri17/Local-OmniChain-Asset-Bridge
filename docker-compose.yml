@@ -1,0 +1,41 @@
+services:
+  chain-a:
+    image: ghcr.io/foundry-rs/foundry:latest
+    entrypoint: ["anvil", "--port", "8545", "--chain-id", "1111", "--host", "0.0.0.0", "--block-time", "1"]
+    ports:
+      - "8545:8545"
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5s bash -c 'echo > /dev/tcp/127.0.0.1/8545' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  chain-b:
+    image: ghcr.io/foundry-rs/foundry:latest
+    entrypoint: ["anvil", "--port", "9545", "--chain-id", "2222", "--host", "0.0.0.0", "--block-time", "1"]
+    ports:
+      - "9545:9545"
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5s bash -c 'echo > /dev/tcp/127.0.0.1/9545' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  relayer:
+    build: ./relayer
+    restart: on-failure
+    environment:
+      - CHAIN_A_RPC_URL=http://chain-a:8545
+      - CHAIN_B_RPC_URL=http://chain-b:9545
+      - DEPLOYER_PRIVATE_KEY=${DEPLOYER_PRIVATE_KEY}
+      - CONFIRMATION_DEPTH=${CONFIRMATION_DEPTH}
+      - DB_PATH=/usr/src/app/data/processed_nonces.db
+      - DEPLOYMENTS_PATH=/usr/src/app/deployments.json
+    volumes:
+      - ./relayer_data:/usr/src/app/data
+      - ./deployments.json:/usr/src/app/deployments.json
+    depends_on:
+      chain-a:
+        condition: service_healthy
+      chain-b:
+        condition: service_healthy

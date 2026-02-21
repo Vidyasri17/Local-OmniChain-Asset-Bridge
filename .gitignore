@@ -1,0 +1,12 @@
+node_modules
+.env
+relayer_data
+artifacts
+cache
+deployments.json
+*.db
+*.json
+!package.json
+!package-lock.json
+!relayer/package.json
+!relayer/package-lock.json
